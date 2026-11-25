@@ -176,6 +176,25 @@ input:not([type=radio]):not([type=checkbox]),select {background:var(--paper);col
 .date-filter label {min-width:0}.date-filter button[name=range] {background:transparent;color:var(--green);border:1px solid var(--line)}
 @media(max-width:700px){.booking-layout {grid-template-columns:1fr}.booking-layout .selection {position:static}.day-rail {grid-template-columns:repeat(4,minmax(0,1fr))}.steps {gap:6px 12px}.steps li span {width:22px;height:22px}.home-index .wrap {gap:4px 16px}}
 
+nav .desktop-menu {display:flex;gap:24px;align-items:center}
+.desktop-menu a {color:#f5ecd9;font-size:.95rem;padding:9px 0}
+.menu-items a:last-child {border-top:1px solid #5f5240;color:#f2d99e}
+.service-tip {width:100%;margin:2px 0 12px;padding:0;border:0;background:transparent}
+.service-tip summary {padding-inline:0;font-size:.94rem}
+.service-tip p {font-size:.94rem}
+.pick-text {display:grid;gap:3px;flex:1}
+.pick-text small,.session-times small {display:block;color:var(--muted);font-weight:400;font-size:.82rem}
+.week-links {display:flex;gap:16px;flex-wrap:wrap}
+.week-links a {display:inline-flex;align-items:center;min-height:44px}
+.day-rail a {gap:3px;align-content:center;min-height:66px}
+.day-rail small {font-size:.72rem;color:inherit;font-weight:400}
+.session-times {display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr))}
+.session-times label {min-height:55px}
+.session-times label:has(:focus-visible),a:focus-visible,summary:focus-visible,button:focus-visible {outline:3px solid var(--green);outline-offset:2px}
+.next-client {display:flex;align-items:center;justify-content:space-between;gap:15px;padding:18px;background:var(--surface);border:1px solid var(--line);border-inline-start:4px solid var(--gold);border-radius:10px}
+.next-client p,.next-client h3 {margin:4px 0}
+@media(max-width:850px){nav .desktop-menu{display:none}}
+@media(max-width:500px){.next-client{align-items:start;flex-direction:column}.session-times{grid-template-columns:repeat(2,minmax(0,1fr))}.pick-card{gap:8px}.booking-panel{padding:16px}.menu-items a{min-height:44px}.pick-text small{font-size:.8rem}}
 </style><body><script>const minute=60000, live=false;
 const dayOf=t=>new Date(t+180*minute).toISOString().slice(0,10);
 const timeText=t=>new Intl.DateTimeFormat('ar',{timeZone:'Asia/Riyadh',hour:'numeric',minute:'2-digit'}).format(t);
@@ -193,6 +212,7 @@ const hidden=(n,v)=>'<input type="hidden" name="'+n+'" value="'+esc(v)+'">';
 function navigation(title) {
   return `<header class="mast"><nav aria-label="القائمة الرئيسية">
     <a class="brand" href="/"><span class="brand-icon" aria-hidden="true">✂</span><span>صالون آدم<small>ADAM BARBERSHOP</small></span></a>
+    <div class="desktop-menu"><a href="/#services">الخدمات</a><a href="/#team">الحلاقون والدوام</a><a href="/#faq">قبل زيارتك</a></div>
     <div class="header-actions"><button class="theme-toggle" type="button" aria-label="تغيير المظهر" hidden>☼</button>
     <a class="gold-action" href="/book">احجز موعدك <span aria-hidden="true">←</span></a>
     <details class="menu"><summary aria-label="قائمة التنقل"><i></i></summary><div class="menu-items">
@@ -207,15 +227,16 @@ const input=(label,name,type='text',value='',extra='')=>'<label>'+label+'<input 
 const card=(title,body)=>'<article><h3>'+esc(title)+'</h3>'+body+'</article>';
 const grid=items=>'<div class="grid">'+items.join('')+'</div>';
 const link=(href,label)=>'<a class="btn" href="'+esc(href)+'">'+esc(label)+'</a>';
+const serviceGuide = {
+  'قص شعر': ['نتفق على الطول والتدرّج، ثم نقص ونصفّف على ذوقك.', 'إذا ودّك تحافظ على طول الشعر فوق، حدّد لحلاقك وين تبي يبدأ التدرّج على الجنب.'],
+  'تهذيب لحية': ['تهذيب الطول وتحديد الخد والرقبة حسب شكل اللحية.', 'قل لحلاقك إذا تفضّل تحديدًا حادًا أو خطًا طبيعيًا، وورّه الطول اللي تبي تحتفظ فيه.'],
+  'قص شعر ولحية': ['قص وتصفيف الشعر مع تهذيب اللحية في جلسة واحدة.', 'اخترها إذا تبي تضبط السوالف مع اللحية وتطلع بقصّة متناسقة.']
+};
 function landing() {
-  const serviceNotes = {
-    1: 'نتفق على الطول والتدرّج، ثم نقص ونصفّف على ذوقك.',
-    2: 'تهذيب الطول وتحديد الخد والرقبة حسب شكل اللحية.',
-    3: 'قص وتصفيف الشعر مع تهذيب اللحية في موعد واحد.'
-  };
   const menu = services().map(s => `<article class="service-card">
     <span class="meta-chip">${s.duration} دقيقة</span><h3>${esc(s.name)}</h3>
-    <p>${esc(serviceNotes[s.id] || 'اختر حلاقك لعرض الأوقات المتاحة لهذه الخدمة.')}</p>
+    <p>${esc(serviceGuide[s.name]?.[0] || 'اختر حلاقك لعرض الأوقات المتاحة لهذه الخدمة.')}</p>
+    ${serviceGuide[s.name] ? '<details class="service-tip"><summary>هل تناسبني؟</summary><p>'+esc(serviceGuide[s.name][1])+'</p></details>' : ''}
     <a href="/book?service=${s.id}">احجز هذه الخدمة ←</a></article>`).join('');
   const dayNamesShort = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
   const team = staffList().map(b => `<article class="profile-card">
@@ -240,6 +261,8 @@ function landing() {
     <details><summary>هل أقدر أختار الحلاق؟</summary><p>إيه. تقدر تشوف دوام كل حلاق وتختاره قبل تحديد الخدمة والتاريخ.</p></details>
     <details><summary>كيف أغيّر موعدي أو ألغيه؟</summary><p>افتح رابط إدارة الحجز. تقدر تعدّل أو تلغي إلى ساعة قبل الموعد.</p></details>
     <details><summary>وش يصير إذا ما لقيت وقت؟</summary><p>اختَر تاريخًا آخر أو ارجع وجرّب حلاقًا ثانيًا. خدمة الساعة تحتاج خانتين متتاليتين.</p></details>
+    <details><summary>متى يصير الموعد باسمي؟</summary><p>بعد إدخال رمز الجوال وظهور صفحة الحجز. يبقى الوقت متاحًا للآخرين أثناء إدخال الرمز، فاحتفظ برابط إدارة الموعد بعد التأكيد.</p></details>
+    <details><summary>إذا ما ردّيت على التذكير، يروح موعدي؟</summary><p>يبقى موعدك محجوزًا، ويشوف الحلاق إنك ما ردّيت. إذا حجزت قبل الموعد بأقل من ساعتين، تقدر تتابع حجزك من رابط الإدارة مباشرة.</p></details>
     </div></div></section>`);
 }
 
@@ -254,33 +277,49 @@ function bookingProgress(active) {
     '<li '+(index===active?'aria-current="step"':'')+'><span>'+ (index<active?'✓':index+1)+'</span>'+label+'</li>').join('')+'</ol>';
 }
 const bookingLink=(p)=>'/book?'+new URLSearchParams(p).toString();
+const shiftDay=(day,offset)=>dayOf(Date.parse(day+'T12:00Z')+offset*86400000);
+function firstOpening(barber,duration,from,through) {
+  for(let date=from;date<=through;date=shiftDay(date,1)) {
+    const [start]=slots(barber,duration,date);
+    if(start)return {date,start};
+  }
+}
 function book(p) {
   const team=staffList(), menu=services();
   const barber=team.find(b=>b.id===+p.barber), service=menu.find(s=>s.id===+p.service);
   const today=dayOf(Date.now()), last=dayOf(Date.now()+60*86400000);
-  const day=/^\d{4}-\d{2}-\d{2}$/.test(p.day || '') && Number.isFinite(Date.parse(p.day+'T12:00Z')) && p.day>=today && p.day<=last ? p.day : today;
+  const day=/^\d{4}-\d{2}-\d{2}$/.test(p.day || '') && Number.isFinite(Date.parse(p.day+'T12:00Z')) && shiftDay(p.day,0)===p.day && p.day>=today && p.day<=last ? p.day : today;
   const picks={ ...(barber?{barber:barber.id}:{}), ...(service?{service:service.id}:{}), day };
   const step=!barber || p.edit==='barber'?0:!service || p.edit==='service'?1:2;
   let body;
   if(step===0) {
-    const cards=team.map(b=>`<a class="pick-card" href="${esc(bookingLink({...picks,barber:b.id}))}">
-      <span class="monogram" aria-hidden="true">${esc(b.name[0])}</span><strong>${esc(b.name)}</strong><span aria-hidden="true">←</span></a>`);
+    const duration=service?.duration ?? Math.min(...menu.map(s=>s.duration));
+    const horizon=shiftDay(day,6)<last?shiftDay(day,6):last;
+    const cards=team.map(b=>{
+      const opening=Number.isFinite(duration) && firstOpening(b.id,duration,day,horizon);
+      const hint=opening ? 'أقرب جلسة '+duration+' دقيقة · '+(opening.date===today?'اليوم':calendarLabel(opening.date))+'، '+timeText(opening.start) : 'اعرض الجدول لاختيار يوم آخر';
+      return `<a class="pick-card" href="${esc(bookingLink({...picks,barber:b.id,day:opening?.date || day}))}"><span class="monogram" aria-hidden="true">${esc(b.name[0])}</span><span class="pick-text"><strong>${esc(b.name)}</strong><small>${esc(hint)}</small></span><span aria-hidden="true">←</span></a>`;
+    });
     body='<h2>مع مين تبي تحجز؟</h2><div class="pick-grid">'+(cards.join('')||'<p>لا يوجد حلاقون متاحون حاليًا.</p>')+'</div>';
   } else if(step===1) {
     const cards=menu.map(s=>`<a class="pick-card" href="${esc(bookingLink({...picks,service:s.id}))}">
-      <strong>${esc(s.name)}</strong><span class="meta-chip">${s.duration} دقيقة</span><span aria-hidden="true">←</span></a>`);
+      <span class="pick-text"><strong>${esc(s.name)}</strong><small>${esc(serviceGuide[s.name]?.[0] || '')}</small></span><span class="meta-chip">${s.duration} دقيقة</span><span aria-hidden="true">←</span></a>`);
     body='<h2>اختَر خدمتك</h2><div class="pick-grid">'+(cards.join('')||'<p>لا توجد خدمات متاحة حاليًا.</p>')+'</div>';
   } else {
     const dayFormat=new Intl.DateTimeFormat('ar-SA-u-ca-gregory',{weekday:'short',day:'numeric',month:'short',timeZone:'Asia/Riyadh'});
-    const days=Array.from({length:7},(_,index)=>dayOf(Date.parse(day+'T12:00Z')+index*86400000)).filter(d=>d<=last);
-    const dayRail='<div class="day-rail" aria-label="اختيار يوم">'+days.map(d=>`<a href="${esc(bookingLink({...picks,day:d}))}" ${d===day?'aria-current="date"':''}>${esc(d===today?'اليوم':dayFormat.format(new Date(d+'T12:00Z')))}</a>`).join('')+'</div>';
-    const free=slots(barber.id,service.duration,day);
-    const next=Array.from({length:14},(_,index)=>dayOf(Date.parse(day+'T12:00Z')+(index+1)*86400000)).find(d=>d<=last && slots(barber.id,service.duration,d).length);
+    const dayOffset=Math.round((Date.parse(day)-Date.parse(today))/86400000);
+    const weekStart=shiftDay(today,7*Math.floor(dayOffset/7));
+    const days=Array.from({length:7},(_,i)=>shiftDay(weekStart,i)).filter(d=>d<=last);
+    const week=new Map(days.map(d=>[d,slots(barber.id,service.duration,d)]));
+    const weekLink=(offset,label)=>{const d=shiftDay(weekStart,offset);return d<today||d>last?'':'<a href="'+esc(bookingLink({...picks,day:d}))+'">'+label+'</a>';};
+    const dayRail='<div class="week-links">'+weekLink(-7,'→ الأسبوع السابق')+weekLink(7,'الأسبوع التالي ←')+'</div><div class="day-rail" aria-label="اختيار يوم">'+days.map(d=>`<a href="${esc(bookingLink({...picks,day:d}))}" ${d===day?'aria-current="date"':''}>${esc(d===today?'اليوم':dayFormat.format(new Date(d+'T12:00Z')))}<small>${week.get(d).length ? week.get(d).length+' وقت متاح' : 'غير متاح'}</small></a>`).join('')+'</div>';
+    const free=week.get(day);
+    const next=!free.length && firstOpening(barber.id,service.duration,shiftDay(day,1),last)?.date;
     const periods=[['صباحًا',0,12],['بعد الظهر',12,17],['مساءً',17,24]];
     const groups=periods.map(([label,from,to])=>{
       const times=free.filter(t=>{const h=new Date(t+180*minute).getUTCHours();return h>=from && h<to;});
       if(!times.length)return '';
-      return '<fieldset class="group"><legend>'+label+'</legend><div class="times slots">'+times.map(t=>'<label><input required type="radio" name="start" value="'+t+'"><span>'+timeText(t)+'</span></label>').join('')+'</div></fieldset>';
+      return '<fieldset class="group"><legend>'+label+'</legend><div class="times slots session-times">'+times.map(t=>'<label><input required type="radio" name="start" value="'+t+'"><span>'+timeText(t)+'<small>حتى '+timeText(t+service.duration*minute)+'</small></span></label>').join('')+'</div></fieldset>';
     }).join('');
     const details=hidden('barber',barber.id)+hidden('service',service.id)+groups+'<h3>بيانات الحجز</h3><div class="contact">'+input('اسم الزبون','customer','text','','maxlength="80" autocomplete="given-name"')+input('رقم الجوال','phone','tel','','placeholder="05xxxxxxxx" autocomplete="tel"')+'</div>';
     const otherDay='<details class="calendar-extra"><summary>اختَر تاريخًا آخر</summary><form action="/book">'+hidden('barber',barber.id)+hidden('service',service.id)+dateInput(day)+'<button>عرض التاريخ</button></form></details>';
@@ -326,11 +365,49 @@ function dashboard(u,p){const owner=u.role==='owner',day=p.day||dayOf(Date.now()
  const tab=tabs.some(([id])=>id===p.tab)?p.tab:'bookings';
  let html='<section class="dash-head"><div><small>'+esc(u.name)+'</small><h1>'+(owner?'لوحة المالك':'لوحة الحلاق')+'</h1></div>'+form('/logout','','تسجيل الخروج')+'</section>';
  html+='<div class="tabbar" role="navigation" aria-label="أقسام لوحة التحكم">'+tabs.map(([id,label])=>'<a href="?tab='+id+'" '+(tab===id?'aria-current="page"':'')+'>'+label+'</a>').join('')+'</div>';
- if(tab==='bookings') html+='<section class="dash-section">'+'<div class="stats">'+[['مواعيد اليوم',rows.filter(b=>dayOf(b.start)===dayOf(Date.now())&&b.status!=='cancelled').length],['مواعيد قادمة',rows.filter(b=>b.start>Date.now()&&b.status==='booked').length],['بانتظار رد',rows.filter(b=>b.start>Date.now()&&b.reply==='unanswered'&&b.status==='booked').length]].map(([k,v])=>card(k,'<strong>'+v+'</strong>')).join('')+'</div><h2>الحجوزات</h2>'+filters+'<p class="muted">'+shown.length+' نتيجة</p>'+grid(shown.map(b=>card(b.customer,'<p>'+esc(b.stylist)+' · '+esc(b.service)+'<br>'+when(b.start)+'<br><a dir="ltr" href="tel:'+esc(b.phone)+'">'+esc(b.phone)+'</a></p><span class="status status-'+b.status+'">'+states[b.status]+'</span> <span class="reply">'+replies[b.reply]+'</span><p>'+link('/appointment?id='+b.id,'تفاصيل وإدارة')+'</p>')))+(shown.length?'':'<p>ما فيه حجوزات في هذا العرض.</p>')+'</section>';
+ let nextCard='';
+ if(tab==='bookings'){
+   const upcoming=shown.find(b=>b.status==='booked' && b.start>=Date.now());
+   if(upcoming){
+     nextCard='<aside class="next-client"><div><small>أقرب موعد في النتائج</small><h3>'+esc(upcoming.customer)+' · '+esc(upcoming.service)+'</h3><p>'+esc(upcoming.stylist)+' · '+calendarLabel(dayOf(upcoming.start))+' · '+timeText(upcoming.start)+'</p></div>'+link('/appointment?id='+upcoming.id,'افتح الموعد')+'</aside>';
+   }
+ }
+ if(tab==='bookings') html+='<section class="dash-section">'+'<div class="stats">'+[['مواعيد اليوم',rows.filter(b=>dayOf(b.start)===dayOf(Date.now())&&b.status!=='cancelled').length],['مواعيد قادمة',rows.filter(b=>b.start>Date.now()&&b.status==='booked').length],['بانتظار رد',rows.filter(b=>b.start>Date.now()&&b.reply==='unanswered'&&b.status==='booked').length]].map(([k,v])=>card(k,'<strong>'+v+'</strong>')).join('')+'</div><h2>الحجوزات</h2>'+filters+nextCard+'<p class="muted">'+shown.length+' نتيجة</p>'+grid(shown.map(b=>card(b.customer,'<p>'+esc(b.stylist)+' · '+esc(b.service)+'<br>'+when(b.start)+'<br><a dir="ltr" href="tel:'+esc(b.phone)+'">'+esc(b.phone)+'</a></p><span class="status status-'+b.status+'">'+states[b.status]+'</span> <span class="reply">'+replies[b.reply]+'</span><p>'+link('/appointment?id='+b.id,'تفاصيل وإدارة')+'</p>')))+(shown.length?'':'<p>ما فيه حجوزات في هذا العرض.</p>')+'</section>';
  if(tab==='team') html+='<section class="dash-section"><h2>'+(owner?'الفريق والدوام':'أوقات تواجدي')+'</h2>'+grid(bList.map(b=>card(b.name,schedule(b)+(owner?'<details><summary>إعدادات الحلاق</summary>'+form('/staff-edit',hidden('id',b.id)+input('الاسم','name','text',b.name)+'<label>كلمة مرور جديدة (اختياري)<input type="password" name="pass" minlength="12"></label>','تحديث')+form('/archive',hidden('id',b.id),'إزالة من الفريق')+'</details>':''))))+'</section>';
  if(owner&&tab==='settings'){html+='<section class="dash-section"><h2>إدارة الصالون</h2><details><summary>إضافة حلاق</summary>'+form('/new-staff',input('اسم الحلاق','name')+input('اسم الدخول','login')+input('كلمة المرور (12 حرفًا على الأقل)','pass','password','','minlength="12"'),'إضافة الحلاق')+'</details><details><summary>الخدمات والمدد</summary>'+services().map(s=>form('/service',hidden('id',s.id)+input('الخدمة','name','text',s.name)+input('الدقائق','duration','number',s.duration,'min="30" max="480" step="30"'),'حفظ')+form('/service-remove',hidden('id',s.id),'إزالة الخدمة')).join('')+form('/service',input('اسم خدمة جديدة','name')+input('الدقائق','duration','number',30,'min="30" max="480" step="30"'),'إضافة الخدمة')+'</details><details><summary>حالة رسائل الحجوزات</summary>'+all('SELECT booking,kind,state FROM outbox ORDER BY id DESC LIMIT 30').map(m=>'<p>حجز '+m.booking+' · '+({book:'تأكيد',move:'تغيير',cancel:'إلغاء',reminder:'تذكير'}[m.kind])+' · '+({waiting:'بانتظار الإرسال',sent:live?'قُبلت لدى المزوّد':'محاكاة محلية',failed:'تعذّر الإرسال',obsolete:'تجاوزها تعديل'}[m.state])+'</p>').join('')+'</details></section>';}
  return page(owner?'لوحة المالك':'مواعيدي',html);}
 
+
+function initializeNavigation() {
+const root = document.documentElement;
+const toggle = document.querySelector('.theme-toggle');
+function applyTheme(theme) {
+  root.dataset.theme = theme;
+  toggle.textContent = theme === 'light' ? '☾' : '☼';
+  toggle.setAttribute('aria-label', theme === 'light' ? 'تفعيل الوضع الداكن' : 'تفعيل الوضع الفاتح');
+}
+let storedTheme;
+try { storedTheme = localStorage.getItem('salon-theme'); } catch {}
+applyTheme(storedTheme === 'light' ? 'light' : 'dark');
+toggle.hidden = false;
+toggle.onclick = () => {
+  applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
+  try { localStorage.setItem('salon-theme', root.dataset.theme); } catch {}
+};
+}
+document.addEventListener('click', event => {
+  const menu = document.querySelector('.menu');
+  if (!menu.contains(event.target) || event.target.closest('.menu-items a')) menu.open = false;
+});
+document.addEventListener('keydown', event => {
+  const menu = document.querySelector('.menu');
+  if (event.key === 'Escape' && menu.open) {
+    menu.open = false;
+    menu.querySelector('summary').focus();
+  }
+});
+
+if (document.querySelector(".theme-toggle")) initializeNavigation();
 
 function go(path){const hash='#!'+path;if(location.hash===hash)render();else location.hash=hash;scrollTo(0,0);}
 function render(){
@@ -355,7 +432,7 @@ function render(){
  document.querySelector('main').insertAdjacentHTML('afterbegin','<div class="demo-bar">نسخة تجربة · استخدم بيانات وهمية</div>');
  document.querySelector('footer').textContent='نسخة تجريبية · البيانات محفوظة في هذا المتصفح فقط';
  document.querySelectorAll('a').forEach(a=>{const href=a.getAttribute('href');if(href?.startsWith('/#'))a.href='#'+href.slice(2);else if(href?.startsWith('/'))a.href='#!'+href;else if(href?.startsWith('?'))a.href='#!'+url.pathname+href;});
- const theme=document.querySelector('.theme-toggle');theme.hidden=false;theme.onclick=()=>{document.documentElement.dataset.theme=document.documentElement.dataset.theme==='light'?'dark':'light';};
+ initializeNavigation();
  const name=document.querySelector('[name=customer]'),phone=document.querySelector('[name=phone]');if(name&&phone){name.value='زبون تجريبي';phone.value='0550000000';phone.readOnly=true;}
  if(staff)document.querySelectorAll('input[type=password]').forEach(x=>{x.required=false;x.disabled=true;x.placeholder='معطّل في العرض التجريبي';});
 }
